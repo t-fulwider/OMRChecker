@@ -26,6 +26,19 @@ zero_to_one_number = {
     "minimum": 0,
     "maximum": 1,
 }
+normalized_anchor_region = {
+    "type": "array",
+    "prefixItems": [
+        zero_to_one_number,
+        zero_to_one_number,
+        zero_to_one_number,
+        zero_to_one_number,
+    ],
+    "items": False,
+    "minItems": 4,
+    "maxItems": 4,
+    "description": "[x_min, y_min, x_max, y_max], normalized from 0 to 1",
+}
 
 TEMPLATE_SCHEMA = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -71,6 +84,7 @@ TEMPLATE_SCHEMA = {
                         "type": "string",
                         "enum": [
                             "CropOnMarkers",
+                            "CropOnLMarkers",
                             "CropPage",
                             "FeatureBasedAlignment",
                             "GaussianBlur",
@@ -98,6 +112,29 @@ TEMPLATE_SCHEMA = {
                                         "sheetToMarkerWidthRatio": {"type": "number"},
                                     },
                                     "required": ["relativePath"],
+                                }
+                            }
+                        },
+                    },
+                    {
+                        "if": {"properties": {"name": {"const": "CropOnLMarkers"}}},
+                        "then": {
+                            "properties": {
+                                "options": {
+                                    "type": "object",
+                                    "additionalProperties": False,
+                                    "properties": {
+                                        "anchorPoints": {
+                                            "type": "array",
+                                            "items": normalized_anchor_region,
+                                            "description": "Image regions to search for L-shaped markers",
+                                        },
+                                        "morphKernel": two_positive_integers,
+                                        "minContourArea": positive_number,
+                                        "maxContourAreaRatio": zero_to_one_number,
+                                        "cannyThreshold1": positive_integer,
+                                        "cannyThreshold2": positive_integer,
+                                    },
                                 }
                             }
                         },
